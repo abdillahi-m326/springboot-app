@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  db:
+    container_name: postgres-spring-boot
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: springdemo
+      PGDATA: /data/postgres
+    volumes:
+      - db:/data/postgres
+    ports:
+      - "5332:5432"
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  app:
+    container_name: springboot-app
+    build: .
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    networks:
+      - app-network
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/springdemo
+      SPRING_DATASOURCE_USERNAME: myuser
+      SPRING_DATASOURCE_PASSWORD: mypassword
+    restart: unless-stopped
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  db:
